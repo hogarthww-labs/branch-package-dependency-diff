@@ -1,0 +1,27 @@
+lib-common:
+  - lib-form-widgets
+  - lib-navbar
+  - lib-share
+  - lib-permission
+  - lib-metadata
+  - lib-itemlist
+  - asset
+lib-form-widgets:
+  - lib-navbar
+  - lib-share
+  - lib-metadata
+  - lib-item-list
+  - asset
+lib-navbar:
+  - admin
+  - asset
+lib-share:
+  - asset
+lib-permission:
+  - lib-share
+  - lib-navbar
+  - admin
+lib-metadata:
+  - asset
+lib-item-list:
+  - asset
