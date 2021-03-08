@@ -44,3 +44,60 @@ const impacted = dependencies.impacted(compareOpts)
 const appName = name => !name.includes('-lib')
 const appsImpacted = impacted.filter(appName)
 ```
+
+The `dependency-map.yml` could look sth like this.
+
+```yaml
+lib-common:
+  - lib-form-widgets
+  - lib-navbar
+  - lib-share
+  - lib-permission
+  - lib-metadata
+  - lib-itemlist
+  - asset
+lib-form-widgets:
+  - lib-navbar
+  - lib-share
+  - lib-metadata
+  - lib-item-list
+  - asset
+lib-navbar:
+  - admin
+  - asset
+lib-share:
+  - asset
+lib-permission:
+  - lib-share
+  - lib-navbar
+  - admin
+lib-metadata:
+  - asset
+lib-item-list:
+  - asset
+```
+
+With `recursive` option enabled the dependencies will be resolved recursively so that we can optimize the mapping file as follows:
+
+```yaml
+lib-common:
+  - lib-form-widgets
+  - lib-permission
+lib-form-widgets:
+  - lib-navbar
+  - lib-share
+  - lib-metadata
+  - lib-item-list
+lib-navbar:
+  - admin
+  - asset
+lib-share:
+  - asset
+lib-permission:
+  - lib-share
+  - lib-navbar
+lib-metadata:
+  - asset
+lib-item-list:
+  - asset
+```
