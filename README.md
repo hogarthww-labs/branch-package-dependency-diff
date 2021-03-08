@@ -16,12 +16,12 @@ const gitOpts = {
   oauth2_token: process.env.GITHUB_AUTH_TOKEN
 }
 
-const compare = createBranchCompare(
+const compare = createBranchCompare({
   repository,
   branchMap,
   fileDetails,
   gitOpts
-)
+})
 const packages = ['@x5/common-lib', '@x5/permission-lib']
 
 const matches = compare.matchingDependencyModifications(packages)
@@ -30,17 +30,16 @@ const matches = compare.matchingDependencyModifications(packages)
 Calculate uniquely impacted packages from library changes detected.
 
 ```js
-import * as readYaml from 'read-yaml';
-const dependencyMap = readYaml.sync('./sample/dependency-map.yml');
-const packageNames = Object.keys(dependencyMap)
+const filePath = './sample/dependency-map.yml'
+const compareOpts = {
+  repository,
+  branchMap,
+  fileDetails,
+  gitOpts
+}
+const impacted = createDependencies(filePath).impacted(compareOpts)
 
-// ...
-const matches = compare.matchingDependencyModifications(packageNames)
-
-const impacted = matches.reduce((acc, name) => {
-  acc.push(...dependencyMap[name])
-  return acc
-}, [])
-
-const uniqueImpacted = Array.from(new Set(impacted))
+// app name is any name that is not a lib name
+const appName = name => !name.includes('-lib')
+const appsImpacted = impacted.filter(appName)
 ```

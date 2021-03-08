@@ -14,11 +14,20 @@ export interface IFileDetails {
   folderPath?: string
 }
 
-export const createBranchCompare = (repository: string, branchMap: IBranchMap, fileDetails: IFileDetails = {}, gitOpts = {}) => {
-  return new BranchCompare(repository, branchMap, fileDetails, gitOpts)
+export interface IBranchCompare {
+  repository: string
+  branchMap: IBranchMap
+  fileDetails?: IFileDetails
+  gitOpts?: any
+}
+
+
+export const createBranchCompare = (opts: IBranchCompare) => {
+  return new BranchCompare(opts)
 }
 
 export class BranchCompare {
+  repository: string
   fileMap: any = {}
   branchMap = {
     master: 'master'
@@ -26,9 +35,11 @@ export class BranchCompare {
   filePath = 'package.json'
   gitOpts: any = {}
 
-  constructor(public repository: string, branchMap: IBranchMap, fileDetails: IFileDetails = {}, gitOpts: any = {}) {
+  constructor(opts: IBranchCompare) {
+    const { repository, branchMap, fileDetails, gitOpts } = opts
     const { folderPath } = fileDetails
     let { filePath } = fileDetails
+    this.repository = repository
     this.branchMap = {
       ...this.branchMap,
       ...branchMap
@@ -69,14 +80,18 @@ export class BranchCompare {
     return this
   }
 
+  validate(opts) {
+    if (!opts.branch) {
+      throw new Error("getFile: Missing branch option")
+    }
+  }
+
+
   getFile = async (opts: any = {}) => {
     const { repository } = this
     const branch = opts.branch
     const gitOpts = this.gitOpts
     const provider = 'github'
-    if (!branch) {
-      throw new Error("getFile: Missing branch option")
-    }
     const getOpts = {
       repository,
       branch,
@@ -84,6 +99,7 @@ export class BranchCompare {
       ...gitOpts,
       ...opts
     }
+    this.validate(getOpts)
     return await getFile(getOpts)
   }
 }
