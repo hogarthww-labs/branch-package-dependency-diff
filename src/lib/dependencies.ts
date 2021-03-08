@@ -9,12 +9,14 @@ export const createDependencies = (filePath: string) => {
 export class Dependencies {
   map: any = {}
   opts: any = {}
+  recursive: boolean
   filePath: string
   _compare: BranchCompare
 
   constructor(opts: any = {}) {
     this.opts = opts
     this.filePath = opts.filePath
+    this.recursive = !!opts.recursive
     this.read()
   }
 
@@ -63,7 +65,7 @@ export class Dependencies {
 
   // override with: recursiveDependenciesFor
   impactedFor(name: string) {
-    return this.dependenciesFor(name)
+    return this.recursive ? this.recursiveDependenciesFor(name) : this.dependenciesFor(name)
   }
 
   impacted(opts: any) {

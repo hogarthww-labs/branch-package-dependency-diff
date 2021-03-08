@@ -30,14 +30,15 @@ const matches = compare.matchingDependencyModifications(packages)
 Calculate uniquely impacted packages from library changes detected.
 
 ```js
-const filePath = './sample/dependency-map.yml'
 const compareOpts = {
   repository,
   branchMap,
   fileDetails,
   gitOpts
 }
-const impacted = createDependencies(filePath).impacted(compareOpts)
+const filePath = './sample/dependency-map.yml'
+const dependencies = createDependencies({filePath, recursive: true})
+const impacted = dependencies.impacted(compareOpts)
 
 // app name is any name that is not a lib name
 const appName = name => !name.includes('-lib')
