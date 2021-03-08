@@ -38,14 +38,14 @@ export class Dependencies {
     return this.compare(opts).matchingDependencyModifications(...this.packageNames)
   }
 
-  recursiveDependenciesFor(name: string, result = []) {
+  recursiveDependenciesFor(name: string, result = []): any[] {
     const dependencies = this.map[name]
     if (dependencies.length === 0) return result
 
     let visited = []
     const allDeps = dependencies.reduce((acc, name) => {
       if (!visited.includes(name)) {
-        const deps = this.recursiveDependenciesFor(name)
+        const deps = this.recursiveDependenciesFor(name).flat()
         visited.push(deps)
         visited = this.unique(visited)
         acc.push(deps)
@@ -71,7 +71,7 @@ export class Dependencies {
   impacted(opts: any) {
     const matches = this.comparePackageNames(opts)
     const impacted = matches.reduce((acc, name) => {
-      const dependencies = this.impactedFor(name)
+      const dependencies = this.impactedFor(name).flat()
       acc.push(...dependencies)
       return acc
     }, [])
