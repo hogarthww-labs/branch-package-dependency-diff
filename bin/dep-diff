@@ -100,7 +100,7 @@ const fileDetails = {
 }
 const gitOpts = {
   gitRemoteUrl,
-  oauth2_token: process.env.GITHUB_AUTH_TOKEN || token
+  oauth2_token: process.env.GITHUB_AUTH_TOKEN || process.env.GITLAB_AUTH_TOKEN || token
 }
 
 const compareOpts = {
