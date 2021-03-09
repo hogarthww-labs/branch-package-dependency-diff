@@ -1,11 +1,33 @@
 # branch-package-dependency-diff
 
+## Binary
+
+`config.yaml` file
+
+```yaml
+dependenciesFile: ./sample/dependency-map.yml
+repository: mylabs/integrator
+packageFilePath: ./package.json
+inverseFilter: -lib
+```
+
+Set environment variable for `GITHUB_AUTH_TOKEN`
+
+`$ export GITHUB_AUTH_TOKEN="<token>"`
+
+Run `dep-diff` binary
+
+`$ ./bin/dep-diff --base https://github.labs.com  --compareBranch release/0.2.7 -c config.yaml`
+
+## API usage
+
 Generate a package dependency diff between 2 `package.json` files in 2 separate  branches
 
 ```js
 import { createBranchCompare } from 'branch-package-dependency-diff'
 
-const repository = 'https://github.labs.com/mylabs/integrator'
+const repository = 'mylabs/integrator'
+const gitRemoteUrl = 'https://github.labs.com'
 const branchMap = {
   compareBranch: 'release/0.2.7'
 }
@@ -13,6 +35,7 @@ const fileDetails = {
   filePath: 'apps/app/collection/soft-package.json'
 }
 const gitOpts = {
+  gitRemoteUrl,
   oauth2_token: process.env.GITHUB_AUTH_TOKEN
 }
 

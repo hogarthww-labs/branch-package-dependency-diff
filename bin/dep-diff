@@ -1,0 +1,124 @@
+#!/usr/bin/env node
+
+const api = require('build/main')
+const yargs = require('yargs')
+
+export const argv = () =>
+  yargs.options({
+    dependenciesFile: {
+      alias: 'd',
+      description: 'File path to dependency mapping yaml file',
+      demand: true
+    },
+    configFile: {
+      alias: 'c',
+      description: 'Config yaml file'
+    },
+    repository: {
+      alias: 'r',
+      description: 'Repository',
+      demand: true
+    },
+    gitRemoteUrl: {
+      alias: 'base',
+      description: 'Gitlab or Github repository remote base url',
+    }
+    provider: {
+      alias: 'g',
+      description: 'Git provider, either gitlab or github (default)',
+      default: 'github'
+    },
+    compareBranch: {
+      alias: 'c',
+      description: 'Branch to compare master with to calculate dependency difference',
+      demand: true
+    },
+    master: {
+      alias: 'm',
+      description: 'Branch name to act as master for comparison',
+      default: 'master'
+    },
+    packageFilePath: {
+      alias: 'p',
+      description: 'File path to package.json file to use for dependency comparison',
+      default: 'package.json'
+    },
+    token: {
+      alias: 't',
+      description: 'OAuth2 token to authenticate with remote git',
+      demand: true
+    },
+    recursive: {
+      alias: 'r',
+      boolean: true,
+      description: 'Enable recursive evaluation of dependencies'
+    },
+    inverseFilter: {
+      alias: 'i',
+      description: 'Impacted modules substring inverse filter'
+    },
+    filter: {
+      description: 'Impacted modules substring filter'
+    }
+  })
+  .help()
+  .argv;
+
+const opts = argv()
+
+const loadConfig = (configFile) => {
+  if (!configFile) return {}
+  const readYaml = require('read-yaml');
+  return readYaml.sync(configFile)
+}
+
+const config = loadConfig(opts.configFile)
+const allOptions = {
+  ...config,
+  ...opts
+}
+
+const {
+  repository,
+  master,
+  compareBranch,
+  dependenciesFile,
+  packageFilePath,
+  token,
+  recursive,
+  inverseFilter,
+  filter,
+  gitRemoteUrl
+} = allOptions
+
+const branchMap = {
+  master,
+  compareBranch
+}
+const fileDetails = {
+  packageFilePath
+}
+const gitOpts = {
+  gitRemoteUrl,
+  oauth2_token: process.env.GITHUB_AUTH_TOKEN || token
+}
+
+const compareOpts = {
+  repository,
+  branchMap,
+  fileDetails,
+  gitOpts
+}
+
+const filePath = dependenciesFile
+const api = require('build/main')
+const dependencies = api.createDependencies({filePath, recursive: true})
+let impacted = dependencies.impacted(compareOpts)
+
+const inverseFilter = name => !name.includes(inverse)
+const filter = name => name.includes(filter)
+
+impacted = inverseFilter ? impacted.filter(inverseFilter) : impacted
+impacted = filter ? impacted.filter(filter) : impacted
+
+console.log(impacted.join(","))

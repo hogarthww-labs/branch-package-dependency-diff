@@ -34,6 +34,8 @@ export class BranchCompare {
   }
   filePath = 'package.json'
   gitOpts: any = {}
+  provider = 'github'
+  gitRemoteUrl: string
 
   constructor(opts: IBranchCompare) {
     const { repository, branchMap, fileDetails, gitOpts } = opts
@@ -48,7 +50,9 @@ export class BranchCompare {
       filePath = path.join(folderPath, 'package.json')
     }
     this.filePath = filePath
-    this.gitOpts = gitOpts
+    this.gitOpts = gitOpts || {}
+    this.provider = gitOpts.provider || this.provider
+    this.gitRemoteUrl = gitOpts.gitRemoteUrl || this.gitRemoteUrl
   }
 
   matchingDependencyModifications(...names: string[]) {
@@ -91,7 +95,7 @@ export class BranchCompare {
     const { repository } = this
     const branch = opts.branch
     const gitOpts = this.gitOpts
-    const provider = 'github'
+    const provider = opts.provider || this.provider
     const getOpts = {
       repository,
       branch,
@@ -100,23 +104,29 @@ export class BranchCompare {
       ...opts
     }
     this.validate(getOpts)
-    return await getFile(getOpts)
+    return await this.downloadFileFromGit(getOpts)
+  }
+
+  createDownloader = (opts) => {
+    const downloader = new GitFileDownloader(opts);
+    opts.provider === 'github' && downloader.setGithubRawBaseUrl(opts.gitRemoteUrl)
+    opts.provider === 'gitlab' && downloader.setGitlabRawBaseUrl(opts.gitRemoteUrl)
+    return downloader
+  }
+
+
+  downloadFileFromGit = async (opts = {}): Promise<string>  => {
+    const downloader = this.createDownloader({
+        output: '.',
+        ...opts,
+    });
+    try {
+      return await downloader.run()
+    } catch (err) {
+      console.error(err);
+      return ''
+    }
   }
 }
 
-/**
- *
- * @returns file
- */
-export const getFile = async (opts = {}): Promise<string>  => {
-  const downloader = new GitFileDownloader({
-      output: '.',
-      ...opts,
-  });
-  try {
-    return await downloader.run()
-  } catch (err) {
-    console.error(err);
-    return ''
-  }
-};
+
